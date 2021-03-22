@@ -41,7 +41,7 @@ void i2c_init(const struct i2c_bus_t *conf) {
     i2c_driver_install(tmp_conf.port, tmp_conf.conf.mode, tmp_conf.rx, tmp_conf.tx, 0);
 }
 
-esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 size, u8 *data) {
+esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 *data, u8 size) {
     assert(size);
     assert(ptr_check(data));
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -63,7 +63,7 @@ u8 i2c_read_byte(const struct i2c_dev_handle_t *dev) {  // dev pointer integrity
     return *buf;
 }
 
-esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, u8 size, const u8 *data) {
+esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, const u8 *data, u8 size) {
     assert(ptr_check(dev));
     assert(size);
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();

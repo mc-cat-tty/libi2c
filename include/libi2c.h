@@ -58,22 +58,41 @@ struct i2c_bus_t {
 };
 
 /**
- * @brief i2c_config struct "constructor"
+ * @brief i2c_config struct "constructor" for master mode
  */
 //#define INIT_I2C_BUS_CONFIG_DEFAULT(X) struct i2c_bus_t X = { .conf = {.mode = I2C_MODE_MASTER; .sda_io_num = 21; .scl_io_num = 22; .sda_pullup_en = GPIO_PULLUP_ENABLE; .scl_pullup_en = GPIO_PULLUP_ENABLE; .master.clk_speed = 400000;  /* 400 kHz */}; .port = PORT_0; .rx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ .tx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ };
-#define INIT_I2C_BUS_CONFIG_DEFAULT(X) struct i2c_bus_t X = { \
+#define init_i2c_bus_default_master(handler) ((struct i2c_bus_t) { \
     .conf = { \
         .mode = I2C_MODE_MASTER, \
-        .sda_io_num = 21, \
-        .scl_io_num = 22, \
+        .sda_io_num = 18, \
+        .scl_io_num = 19, \
         .sda_pullup_en = GPIO_PULLUP_ENABLE, \
         .scl_pullup_en = GPIO_PULLUP_ENABLE, \
         .master.clk_speed = 400000,  /* 400 kHz */ \
         }, \
-    .port = PORT_0, \
+    .port = handler.port, \
     .rx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
     .tx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
-    };
+    })
+
+/**
+ * @brief i2c_config struct "constructor" for slave mode
+ */
+//#define INIT_I2C_BUS_CONFIG_DEFAULT(X) struct i2c_bus_t X = { .conf = {.mode = I2C_MODE_MASTER; .sda_io_num = 21; .scl_io_num = 22; .sda_pullup_en = GPIO_PULLUP_ENABLE; .scl_pullup_en = GPIO_PULLUP_ENABLE; .master.clk_speed = 400000;  /* 400 kHz */}; .port = PORT_0; .rx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ .tx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ };
+#define init_i2c_bus_default_slave(handler) ((struct i2c_bus_t) { \
+    .conf = { \
+        .mode = I2C_MODE_SLAVE, \
+        .sda_io_num = 4, \
+        .scl_io_num = 5, \
+        .sda_pullup_en = GPIO_PULLUP_ENABLE, \
+        .scl_pullup_en = GPIO_PULLUP_ENABLE, \
+        .slave.addr_10bit_en = 0, \
+        .slave.slave_addr = 0x02, \
+        }, \
+    .port = handler.port, \
+    .rx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
+    .tx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
+    })
 
 /**
  * @struct i2c_dev_handle_t
@@ -107,7 +126,7 @@ void i2c_init(const struct i2c_bus_t *conf);
  * @param data pointer to an array of uint8_t, where the data will be stored
  * @return error code
  */
-esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 size, u8 *data);
+esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 *data, u8 size);
 
 /**
  * @brief read one byte and return it
@@ -123,7 +142,7 @@ u8 i2c_read_byte(const struct i2c_dev_handle_t *dev);
  * @param data array of uint8_t
  * @return void
  */
-esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, u8 size, const u8 *data);
+esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, const u8 *data, u8 size);
 
 /**
  * @brief send a byte to the slave
