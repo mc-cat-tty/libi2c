@@ -7,6 +7,8 @@
 
 #include <libi2c.h>
 
+static bool selected_reg = false;
+
 struct i2c_bus_t tmp_conf;
 
 /**
@@ -44,6 +46,7 @@ void i2c_init(const struct i2c_bus_t *conf) {
 esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 *data, u8 size) {
     assert(size);
     assert(ptr_check(data));
+    selected_reg = false;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (dev->addr << 1) | READ_BIT, ACK_CHECK_EN);
@@ -78,4 +81,16 @@ esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, const u8 *data, u8
 
 esp_err_t i2c_write_byte(const struct i2c_dev_handle_t *dev, u8 data) {  // pointer integrity check delegated to i2c_write_bytes
     return i2c_write_bytes(dev, 1, &data);    
+}
+
+void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg, u8 rw) {
+    assert(ptr_check(dev));
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (dev->addr << 1) | rw, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg , ACK_CHECK_EN);
+    i2c_master_stop(cmd);
+    esp_err_t ret = i2c_master_cmd_begin(dev->port, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    selected_reg = true;
 }
