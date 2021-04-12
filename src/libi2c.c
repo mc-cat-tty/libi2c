@@ -48,7 +48,7 @@ esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 *data, u8 size) 
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (dev->addr << 1) | READ_BIT, ACK_CHECK_EN);
     if (size > 1) {
-        i2c_master_read(cmd, data, size - 1, ACK_CHECK_EN);
+        i2c_master_read(cmd, data, size - 1, ACK_VAL);
     }
     i2c_master_read_byte(cmd, data + size - 1, NACK_VAL);
     i2c_master_stop(cmd);

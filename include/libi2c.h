@@ -15,13 +15,14 @@
 #define ACK_CHECK_EN    (0x01)
 #define ACK_CHECK_DIS   (0x00)
 
-#define ACK_VAL         (0x01)
-#define NACK_VAL        (0x00)
+#define ACK_VAL         (0x00)
+#define NACK_VAL        (0x01)
 
 #define WRITE_BIT       I2C_MASTER_WRITE
 #define READ_BIT        I2C_MASTER_READ
 
 #define NO_BUF          (0x00)
+#define STD_BUF         (0xff)
 
 #define PORT_0           I2C_NUM_0
 #define PORT_1           I2C_NUM_1
@@ -61,7 +62,7 @@ struct i2c_bus_t {
  * @brief i2c_config struct "constructor" for master mode
  */
 //#define INIT_I2C_BUS_CONFIG_DEFAULT(X) struct i2c_bus_t X = { .conf = {.mode = I2C_MODE_MASTER; .sda_io_num = 21; .scl_io_num = 22; .sda_pullup_en = GPIO_PULLUP_ENABLE; .scl_pullup_en = GPIO_PULLUP_ENABLE; .master.clk_speed = 400000;  /* 400 kHz */}; .port = PORT_0; .rx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ .tx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ };
-#define init_i2c_bus_default_master(handler) ((struct i2c_bus_t) { \
+#define init_i2c_bus_default_master() ((struct i2c_bus_t) { \
     .conf = { \
         .mode = I2C_MODE_MASTER, \
         .sda_io_num = 18, \
@@ -70,7 +71,7 @@ struct i2c_bus_t {
         .scl_pullup_en = GPIO_PULLUP_ENABLE, \
         .master.clk_speed = 400000,  /* 400 kHz */ \
         }, \
-    .port = handler.port, \
+    .port = PORT_1, \
     .rx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
     .tx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
     })
@@ -79,7 +80,7 @@ struct i2c_bus_t {
  * @brief i2c_config struct "constructor" for slave mode
  */
 //#define INIT_I2C_BUS_CONFIG_DEFAULT(X) struct i2c_bus_t X = { .conf = {.mode = I2C_MODE_MASTER; .sda_io_num = 21; .scl_io_num = 22; .sda_pullup_en = GPIO_PULLUP_ENABLE; .scl_pullup_en = GPIO_PULLUP_ENABLE; .master.clk_speed = 400000;  /* 400 kHz */}; .port = PORT_0; .rx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ .tx = NO_BUF;  /* Leave 0 for master. It doesn't need a buffer */ };
-#define init_i2c_bus_default_slave(handler) ((struct i2c_bus_t) { \
+#define init_i2c_bus_default_slave(addr) ((struct i2c_bus_t) { \
     .conf = { \
         .mode = I2C_MODE_SLAVE, \
         .sda_io_num = 4, \
@@ -87,17 +88,17 @@ struct i2c_bus_t {
         .sda_pullup_en = GPIO_PULLUP_ENABLE, \
         .scl_pullup_en = GPIO_PULLUP_ENABLE, \
         .slave.addr_10bit_en = 0, \
-        .slave.slave_addr = 0x02, \
+        .slave.slave_addr = addr, \
         }, \
-    .port = handler.port, \
-    .rx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
-    .tx = NO_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
+    .port = PORT_0, \
+    .rx = STD_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
+    .tx = STD_BUF,  /* Leave 0 for master. It doesn't need a buffer */ \
     })
 
 /**
  * @struct i2c_dev_handle_t
  * @var i2c_dev_handle_t::port
- *  i2c bus number
+ *  i2c bus number to which the slave is connected
  * @var i2c_dev_handle_t::addr
  *  slave address (7-bit)
  * @see i2c_port_t
