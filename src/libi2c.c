@@ -83,12 +83,12 @@ esp_err_t i2c_write_byte(const struct i2c_dev_handle_t *dev, u8 data) {  // poin
     return i2c_write_bytes(dev, 1, &data);    
 }
 
-void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg, u8 rw) {
+void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg) {
     assert(ptr_check(dev));
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (dev->addr << 1) | rw, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, reg , ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (dev->addr << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(dev->port, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
