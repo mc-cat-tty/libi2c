@@ -8,6 +8,7 @@
 #include <libi2c.h>
 
 static bool selected_reg = false;
+static i2c_cmd_handle_t shared_cmd;
 
 struct i2c_bus_t tmp_conf;
 
@@ -61,17 +62,23 @@ esp_err_t i2c_read_bytes(const struct i2c_dev_handle_t *dev, u8 *data, u8 size) 
 }
 
 u8 i2c_read_byte(const struct i2c_dev_handle_t *dev) {  // dev pointer integrity delegated to i2c_read_bytes
-    u8 *buf = (u8*) malloc(sizeof(u8) * 1);
-    i2c_read_bytes(dev, 1, buf);
-    return *buf;
+    u8 buf;
+    i2c_read_bytes(dev, &buf, 1);
+    return buf;
 }
 
 esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, const u8 *data, u8 size) {
     assert(ptr_check(dev));
     assert(size);
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (dev->addr << 1) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_cmd_handle_t cmd;
+    if (!selected_reg) {
+        cmd = i2c_cmd_link_create();
+        i2c_master_start(cmd);
+        i2c_master_write_byte(cmd, (dev->addr << 1) | WRITE_BIT, ACK_CHECK_EN);
+    } else {
+        cmd = shared_cmd;
+        selected_reg = false;
+    }
     i2c_master_write(cmd, data, size, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(dev->port, cmd, 1000 / portTICK_RATE_MS);
@@ -80,17 +87,25 @@ esp_err_t i2c_write_bytes(const struct i2c_dev_handle_t *dev, const u8 *data, u8
 }
 
 esp_err_t i2c_write_byte(const struct i2c_dev_handle_t *dev, u8 data) {  // pointer integrity check delegated to i2c_write_bytes
-    return i2c_write_bytes(dev, 1, &data);    
+    return i2c_write_bytes(dev, &data, 1);    
 }
 
-void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg) {
+// rw is needed to distinguish between read and write operations,
+// because write is not auto-incremented, whreas read allows burst-read
+void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg, u8 rw) {
     assert(ptr_check(dev));
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, (dev->addr << 1) | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
-    i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(dev->port, cmd, 1000 / portTICK_RATE_MS);
-    i2c_cmd_link_delete(cmd);
+
+    if (rw == READ_BIT) {
+        i2c_master_stop(cmd);
+        esp_err_t ret = i2c_master_cmd_begin(dev->port, cmd, 1000 / portTICK_RATE_MS);
+        i2c_cmd_link_delete(cmd);
+    } else {
+        shared_cmd = cmd;
+    }
+
     selected_reg = true;
 }

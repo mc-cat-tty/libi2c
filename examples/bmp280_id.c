@@ -16,7 +16,7 @@ void app_main() {
     uint8_t id;
 
     while (true) {
-        i2c_select_register(&bmp280, 0xd0);
+        i2c_select_register(&bmp280, 0xd0, READ_BIT);
         i2c_read_bytes(&bmp280, &id, 1);  
         printf("Received bytes: 0x%02x\n", id);
         vTaskDelay(100/portTICK_RATE_MS);

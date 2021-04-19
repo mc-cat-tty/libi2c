@@ -159,7 +159,7 @@ esp_err_t i2c_write_byte(const struct i2c_dev_handle_t *dev, u8 data);
  * @param rw read or write bit
  * @return void
  */
-void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg);
+void i2c_select_register(const struct i2c_dev_handle_t *dev, u8 reg, u8 rw);
 
 /**
  * @brief delete i2c driver and free memory
