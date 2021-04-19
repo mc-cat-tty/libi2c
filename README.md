@@ -15,3 +15,7 @@ How to extract compensation fields
 2. `pdftotext BST-BMP280-DS001-11.pdf -f 21 -l 21`
 3. leave only comprensation parameters table on that text file
 4. `cat BST-BMP280-DS001-11.txt | grep dig_ -A2 | tr "\n" " " | tr "\-\-" "\n" | sed -e "s/unsigned short/uint16_t/" | sed -e "s/signed short/int16_t/"`
+
+## Clock
+Update START_TIME with `date +%s` output
+
