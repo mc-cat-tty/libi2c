@@ -167,7 +167,7 @@ void bmp280_init(void) {
     //         BME280_STANDBY_MS_0_5)
 
     i2c_select_register(&bmp280, 0xf4, WRITE_BIT);
-    i2c_write_byte(&bmp280, 0xff);
+    i2c_write_byte(&bmp280, 0xff);  // Normal mode, sampling x16 for both pressure and temperature
 }
 
 void app_main() {
