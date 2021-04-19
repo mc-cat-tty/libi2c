@@ -2,7 +2,7 @@
  * @file bmp280_values.c
  * @author Francesco Mecatti
  * @date 22 Mar 2021
- * @brief Loopback communcation between ESP32's I2C controllers
+ * @brief BMP280 temperature and pressure readout with ESP32 I2C controller
  */
 
 #include <libi2c.h>

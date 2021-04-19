@@ -1,8 +1,8 @@
 /**
  * @file bmp280_compensations.c
  * @author Francesco Mecatti
- * @date 22 Mar 2021
- * @brief Loopback communcation between ESP32's I2C controllers
+ * @date 18 Apr 2021
+ * @brief Compensation parameters readout with ESP32 I2C controller
  */
 
 #include <libi2c.h>
